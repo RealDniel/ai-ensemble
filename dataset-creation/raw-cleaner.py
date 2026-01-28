@@ -18,13 +18,16 @@ def get_rid_of_gutenberg_stuff(text: str) -> str:
     end = re.search(r"\*\*\* END OF THE PROJECT GUTENBERG EBOOK .* \*\*\*", text)
 
     if start and end:
-        no_headers = re.sub("\n{3,}", "\n\n", text)
+        content = text[start.end():end.start()]
+        content = re.sub("\n{3,}", "\n\n", content)
+    else:
+        content = text
 
-    return no_headers.strip()
+    return content.strip()
 
 
 #Chunk the book into sentences, then make a list of chunks of 2-5 sentences
-def chunker(text: str, min_sents=2, max_sents=5) -> List[str]:
+def chunker(text: str, min_sents=2, max_sents=3) -> List[str]:
     sentences = sent_tokenize(text)
     chunks = []
     

@@ -1,0 +1,110 @@
+base-model: meta-llama/Meta-Llama-3-8B-Instruct
+model-type: LlamaForCasualLM
+tokenizer-type: AutoTokenizer
+
+#Quanitzation
+load_in_8bit: false
+load_in_4bit: true
+strict: false
+
+#dataset config
+datasets:
+  - path: philosophical_advisor_dataset_mixed.jsonl
+    ds_type: json
+    type: sharegpt #for mixed user-assistant and just assistant data (which is what I have)
+    conversation: messages #teh key in the jsonl file for the conversations
+
+#save preprocessed data for future runs
+dataset_prepared_path: ./prepared_data
+
+#train/test (validation) split:
+val_set_size: 
+output_dir: ./philosophical-advisor-lora
+
+
+#Config for LORA
+adapter: lora
+lora_model_dir: #Leave empty?
+
+#Rank
+lora_r: 16
+#Scaling factor
+lora_alpha: 32
+#Dropout
+lora_dropout: 0.05
+
+#which layers to apply lora to (more = better but takes up more memory)
+lora_target_modules:
+  - q_proj    # Query projection
+  - v_proj    # Value projection
+  - k_proj    # Key projection
+  - o_proj    # Output projection
+  - gate_proj
+  - up_proj
+  - down_proj
+
+lora_target_linear: false
+
+
+#Training config
+sequence_length: 2048
+sample_packing: false
+pad_to_sequence_length: true
+
+#Batch size
+micro_batch_size: 4
+gradient_accumulation_steps: 2
+eval_batch_size: 4
+
+#training duration
+num_epochs: 3
+max_steps: 
+
+#Optimizer settings
+optimizer: adamw_torch
+lr_scheduler: cosine
+learning_rate: 0.0002
+
+#Advanced optimizer settings
+weight_decay: 0.0
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_epsilon: 0.00000001
+max_grad_norm: 1.0
+
+
+#Training Behavior
+train_on_inputs: false
+group_by_length: false
+
+#precision/performance
+bf16: auto
+fp16: false
+tf32: false # TensorFloat32 on Ampere GPUs
+
+
+gradient_checkpointing: true
+flash_attention: true
+
+
+#Logging/Saving
+logging_steps: 10
+eval_steps: 500
+save_steps: 500
+save_total_limit: 3
+
+#Optimization
+warmup_steps: 100
+evals_per_epoch: 4
+
+special_tokens:
+  pad_token: "<|end_of_text|>"
+
+
+
+chat_templalte: llama3 # Change to whatever model
+
+debug: false
+debug_num_examples: 10
+
+
